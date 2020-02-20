@@ -15,7 +15,9 @@ def setup():
     size(800, 600, OPENGL)
 
     # Initializing the cam object
+    perspective(PI/3.0, width/height, 1, 10000)
     cam = PeasyCam(this, 500)
+    
 
 def draw():
     global x, y, z, a, b, c
@@ -29,6 +31,8 @@ def draw():
     x += dx
     y += dy
     z += dz
+    
+    speed = sqrt(dx**2 + dy**2 + dz**2)
 
     # Adding the position vectors to points ArrayList
     points.append(PVector(x, y, z))

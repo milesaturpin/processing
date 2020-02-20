@@ -22,6 +22,7 @@ def setup():
     #size(870, 870, P3D)
     size(1400, 1400, P3D)
     cam = PeasyCam(this, 200)
+    #perspective()
     fx = PostFX(this)
     frameRate(24)
     
