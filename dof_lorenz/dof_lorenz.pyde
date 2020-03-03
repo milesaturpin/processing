@@ -25,9 +25,11 @@ def setup():
     global cam, fx, depthShader, dofShader, buf1, buf2, buf3
     background(0)
     
-    
+    #fullScreen(P3D)
+    #
     #size(870, 870, P3D)
     size(1000, 1000, P3D)
+    #smooth()
     #pixelDensity(2)
     cam = PeasyCam(this, 500)
     #perspective(PI/3.0, width/height, 1, 10000)
@@ -76,6 +78,8 @@ def drawScene(pg):
     
     #pg.translate(0, 0, -80)
     pg.scale(6)
+    
+    #pg.smooth()
     
     
     pg.pushMatrix()
@@ -137,7 +141,7 @@ def draw():
      
      #.rgbSplit(50)
      #.chromaticAberration()
-     #.pixelate(map(mouseY, 0, height, 50, 1000))
+     #.pixelate(map(mouseY, 0, height, 25, 1000))
      .compose())
     
     cam.endHUD()

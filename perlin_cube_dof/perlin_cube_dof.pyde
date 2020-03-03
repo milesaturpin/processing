@@ -1,12 +1,17 @@
+#from slider import Slider
+
 add_library('PeasyCam')
 add_library('postfx')
+add_library('controlp5')
 
 # Parameters
 cubeSize = 300.0 
 numBlocks = 12 # 4, 8, 12, 20
-blockSize = 1 * cubeSize // numBlocks # 1, 0.5, 2
+blockSizeParam = 1 # 1, 0.5, 2
+blockSize = blockSizeParam * cubeSize // numBlocks 
 stride = cubeSize // numBlocks
-noiseScale = 20.0 / cubeSize # 100, 20
+noiseScaleParam = 20.0 # 100, 20
+noiseScale = noiseScaleParam / cubeSize 
 sparsity = 4 # 2, 4
 
 # Initialize values
@@ -16,14 +21,26 @@ fx = None
 minNoise = 0
 maxNoise = 1
 
+#sizeSlider = Slider(0.5, 2, 1)
+cp5 = None
+sizeSlider = None
+sparsitySlider = None
+noiseSlider = None
+#cp5_controls = [sizeSlider, sparsitySlider]
+#sizeSliderValue = 1
+#slider = Slider()
+
 def setup():
-    global cam, fx, depthShader, dofShader, buf1, buf2, buf3
+    global cam, fx, depthShader, dofShader, buf1, buf2, buf3 
+    global cp5, sizeSlider, sparsitySlider, noiseSlider
     background(0)
     #size(870, 870, P3D)
-    size(1400, 1400, P3D)
+    size(1200, 1200, P3D)
     cam = PeasyCam(this, 200)
     #perspective()
+    #pixelDensity(2)
     fx = PostFX(this)
+    
     frameRate(24)
     
     depthShader = loadShader("depth.glsl") 
@@ -35,9 +52,39 @@ def setup():
 
     buf1, buf2, buf3 = [createGraphics(width, height, P3D) for e in range(3)]
     buf1.smooth(8), buf2.shader(depthShader), buf3.shader(dofShader)
+    
+    cp5 = ControlP5(this)
+    #name, minimum, maximum, default value (float), x, y, width, height
+    sizeSlider = cp5.addSlider("Size", 0.25, 4, 1., 20, 20, 200, 20)
+    sparsitySlider = cp5.addSlider("Sparsity", 0, 20, 2, 20, 60, 200, 20)
+    noiseSlider = cp5.addSlider("Noise Scale", 0, 200, 20, 20, 100, 200, 20)
+    
+    #sizeSlider.position(200,200)
+    #sizeSlider.label = 'Block Size'
 
+def updateGlobalParams():
+    global cubeSize, numBlocks, blockSizeParam, blockSize, stride, noiseScaleParam, noiseScale, sparsity
+    global sizeSlider, sparsitySlider, noiseSlider
+    
+    cubeSize = 300.0 
+    numBlocks = 12 # 4, 8, 12, 20
+    #sizeSlider.value()
+    blockSizeParam = sizeSlider.getValue()
+    #blockSizeParam = 1 # 1, 0.5, 2
+    blockSize = blockSizeParam * cubeSize // numBlocks 
+    stride = cubeSize // numBlocks
+    noiseScaleParam = noiseSlider.getValue() # 100, 20
+    noiseScale = noiseScaleParam / cubeSize 
+    
+    sparsity = sparsitySlider.getValue() # 2, 4
+    
 
 def drawScene(pg):
+    
+    # Update global params based on slider values
+    updateGlobalParams()
+
+    pg.perspective(PI/3.0, width/height, 1, 10000)
     pg.beginDraw()
     noiseDetail(5, 0.5)
     period = 2*24.0
@@ -104,6 +151,10 @@ def drawScene(pg):
                 # Compute color
                 color1 = [227, 227, 237]
                 color2 = [30, 30, 34]
+                
+                #color1 = [30, 30, 34]
+                #color2 = [227, 227, 237]
+                
                 #color1 = [30, 30, 34]
                 # Red
                 #color1 = [200, 30, 24]
@@ -124,6 +175,13 @@ def drawScene(pg):
                 
     pg.endDraw()
     cam.getState().apply(pg)
+    cp5.setAutoDraw(False)
+    
+# def gui():
+#     #currCameraMatrix = new PMatrix3D(g3.camera);
+#     #camera()
+#     cp5.draw()
+#     #g3.camera = currCameraMatrix;
 
 def draw():
     
@@ -139,6 +197,7 @@ def draw():
     buf3.endDraw()
       
     cam.beginHUD()
+    
     image(buf3, 0, 0)
     (fx
      .render()
@@ -151,5 +210,14 @@ def draw():
      #.pixelate(500)
      .compose())
     
+    cp5.draw()
+    
     cam.endHUD()
+    
+    # This is necessary so that dragging the slider doesn't move the camera
+    cam.setMouseControlled(True)
+    #is_inside_list = [control.isInside() for control in cp5_controls]
+    if sparsitySlider.isInside() or sizeSlider.isInside() or noiseSlider.isInside():
+        cam.setMouseControlled(False)
+    
     #saveFrame("frames/{}.png".format(frameCount))
