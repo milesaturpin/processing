@@ -1,5 +1,3 @@
-#from slider import Slider
-
 add_library('PeasyCam')
 add_library('postfx')
 add_library('controlp5')
